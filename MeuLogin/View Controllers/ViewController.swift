@@ -8,10 +8,11 @@
 
 import UIKit
 import AVFoundation
+import AVKit
 
 
-class ViewController: UIViewController {
-
+class ViewController: UIViewController  {
+    
     var video : AVPlayer?
     var videoPlayerLayer: AVPlayerLayer?
     
@@ -23,67 +24,52 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         setUpVideo()
-        loopVideo(videoLoop: video!)
-    setUpElementos()
-    }
-    override func viewWillAppear(_ animated: Bool) {
-        setUpVideo()
-        loopVideo(videoLoop: video!)
+        setUpElementos()
+        
     }
     
     func setUpElementos() {
         Utilities.styleFilledButton(cadastroButton)
         Utilities.styleHollowButton(loginButton)
-
     }
-
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        self.video!.seek(to: CMTime.zero)
+    }
     
     func setUpVideo() {
         //Get the path to the resource in the bundle
-        print("Working")
         let bundlePath = Bundle.main.path(forResource: "loginbg", ofType: "mp4")
         
         guard bundlePath != nil else {
             return
-            
         }
         //Create a URL from it
-        let url = URL (fileURLWithPath: bundlePath!)
+        let url = URL(fileURLWithPath: bundlePath!)
         
         //Create the video player item
-        let item = AVPlayerItem (url: url)
+        let item = AVPlayerItem(url: url)
         
         //Create the player
-        video = AVPlayer (playerItem: item)
+        video = AVPlayer(playerItem: item)
         
         //Create the layer
         videoPlayerLayer = AVPlayerLayer(player: video!)
         
         // Adjust the size and frame
-
-        
         videoPlayerLayer?.frame = CGRect(x: -self.view.frame.size.width*1.5, y: 0, width: self.view.frame.size.width*4, height: self.view.frame.size.height)
-
+        
         view.layer.insertSublayer(videoPlayerLayer!, at: 0)
-
+        
         // Add it to the view and play it
-        video?.playImmediately(atRate: 0.3)
+        video?.playImmediately(atRate: 1)
         
-        loopVideo(videoLoop: video!)
+        NotificationCenter.default.addObserver( forName: .AVPlayerItemDidPlayToEndTime, object: self.video!.currentItem, queue: .main ) { [weak self] _ in
+            self?.video!.seek(to: CMTime.zero)
+            self?.video!.play()
+        }
     }
-    
-    func loopVideo (videoLoop : AVPlayer) {
-        
-        NotificationCenter().addObserver(forName: .AVPlayerItemDidPlayToEndTime, object: videoLoop, queue: nil) { (error) in
-            print("video em loop")
-        }
-//        NotificationCenter.defaultCenter().addObserverForName(AVPlayerItemDidPlayToEndTimeNotification, object: nil, queue: nil) { notification in
-////
-//            video?.seek(to: <#T##CMTime#>)
-//        videoLoop.seek(to
-//                videoLoop.play()
-            }
-        }
-    
+}
+
 
 
